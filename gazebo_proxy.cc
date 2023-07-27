@@ -33,16 +33,16 @@ CppProxy cpp_proxy;
 int get_socket();
 
 void callback(const protobuf::Message &_msg,
-        const gz::transport::MessageInfo &_info)
-{
+        	  const gz::transport::MessageInfo &_info) {
 	string json_string;
+	
 	protobuf::util::MessageToJsonString(_msg, &json_string, JsonPrintOptions_ctx);
 	if (cpp_proxy.cmd_options->verbose) {
 		cout << "Topic: [" << _info.Topic() << "]" << endl;
 		cout << _msg.DebugString() << endl;
 	}
-
-	json_string.push_back((char) 7);
+	
+	json_string.push_back(0x7);
 
 	if (send(cpp_proxy.socket, json_string.c_str(), json_string.size(), 0) < 0) {
 		cerr << "Error: Socket send failed. Closing the socket." << endl;
@@ -53,19 +53,18 @@ void callback(const protobuf::Message &_msg,
 }
 
 
-void register_nodes() {
+int register_nodes() {
 	gz::transport::Node node;
 
 	for (string topic: cpp_proxy.cmd_options->topics) {
 		cout << topic << endl;
-  		if (!node.Subscribe(topic, callback))
-  		{
+  		if (!node.Subscribe(topic, callback)) {
     		cerr << "Error subscribing to topic [" << topic << "]" << endl;
     		exit(-1);
  		}
 	}
 	gz::transport::waitForShutdown();
-	close(cpp_proxy.socket);
+	return close(cpp_proxy.socket);
 }
 
 
@@ -89,7 +88,6 @@ int get_socket() {
 		cerr << "Error: connection to server with IP: "\
 			<< cpp_proxy.cmd_options->ip << " Port: "\
 			<< cpp_proxy.cmd_options->port << " failed." << endl;
-		//exit(-1);
 		sleep(1);
 	}
 
@@ -106,6 +104,5 @@ int main(int argc, char **argv)
 	CmdOptions cmd_o(argc, argv);
 	cpp_proxy.cmd_options = &cmd_o;
 	cpp_proxy.socket = get_socket();
-	register_nodes();
-	return 0;
+	return register_nodes();
 }

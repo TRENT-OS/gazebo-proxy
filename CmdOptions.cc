@@ -45,7 +45,7 @@ int CmdOptions::parse_args() {
 
 	string option_str = "-v";
 	if (auto pos = find(arguments.begin(), arguments.end(), option_str);
-			pos != arguments.end()) {
+			 pos != arguments.end()) {
 		verbose = true;
 		arguments.erase(pos);
 	}

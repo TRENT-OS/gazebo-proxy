@@ -18,7 +18,7 @@ wget https://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 Install packages:
 ```sh
 sudo apt update
-sudo apt install libgz-transport12
+sudo apt install libgz-transport12 libprotobuf-dev
 ```
 
 ### Compilation
@@ -33,7 +33,7 @@ make
 The created binary can be found under `build/cpp_proxy`.
 
 ## Launch
-The cpp-proxy needs to be run on the **host system outside of the TrentOS docker container**.
+The cpp-proxy needs to be run on the **host system outside of the TRENTOS docker container**.
 
 Example Launch
 ```sh
@@ -44,7 +44,7 @@ The docker ip address of the TrentOS test docker container can vary between syst
 
 If gazebo runs on another machine in the same network, some environment variables need to be set in order to be able to retrieve the topics.
 
-Simulation environment:
+Simulation environment running the PX4-Flightcontroller:
 ```sh
 export GZ_PARTITION=relay
 export GZ_IP=<ip of this host in the local network>
