@@ -1,7 +1,10 @@
 /*
- * Copyright (C) 2023, HENSOLDT Cyber GmbH
+ * Copyright (C) 2023-2024, HENSOLDT Cyber GmbH
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ *
+ * For commercial licensing, contact: info.cyber@hensoldt.net
  */
-
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/util/json_util.h>
@@ -23,7 +26,8 @@ using namespace google;
 
 protobuf::util::JsonPrintOptions JsonPrintOptions_ctx;
 
-struct CppProxy {
+struct CppProxy
+{
 	struct CmdOptions *cmd_options;
 	int socket;
 };
@@ -33,18 +37,21 @@ CppProxy cpp_proxy;
 int get_socket();
 
 void callback(const protobuf::Message &_msg,
-        	  const gz::transport::MessageInfo &_info) {
+			  const gz::transport::MessageInfo &_info)
+{
 	string json_string;
-	
+
 	protobuf::util::MessageToJsonString(_msg, &json_string, JsonPrintOptions_ctx);
-	if (cpp_proxy.cmd_options->verbose) {
+	if (cpp_proxy.cmd_options->verbose)
+	{
 		cout << "Topic: [" << _info.Topic() << "]" << endl;
 		cout << _msg.DebugString() << endl;
 	}
-	
+
 	json_string.push_back(0x7);
 
-	if (send(cpp_proxy.socket, json_string.c_str(), json_string.size(), 0) < 0) {
+	if (send(cpp_proxy.socket, json_string.c_str(), json_string.size(), 0) < 0)
+	{
 		cerr << "Error: Socket send failed. Closing the socket." << endl;
 		close(cpp_proxy.socket);
 		cout << "Trying to establish a new connection" << endl;
@@ -52,52 +59,52 @@ void callback(const protobuf::Message &_msg,
 	}
 }
 
-
-int register_nodes() {
+int register_nodes()
+{
 	gz::transport::Node node;
 
-	for (string topic: cpp_proxy.cmd_options->topics) {
+	for (string topic : cpp_proxy.cmd_options->topics)
+	{
 		cout << topic << endl;
-  		if (!node.Subscribe(topic, callback)) {
-    		cerr << "Error subscribing to topic [" << topic << "]" << endl;
-    		exit(-1);
- 		}
+		if (!node.Subscribe(topic, callback))
+		{
+			cerr << "Error subscribing to topic [" << topic << "]" << endl;
+			exit(-1);
+		}
 	}
 	gz::transport::waitForShutdown();
 	return close(cpp_proxy.socket);
 }
 
-
-int get_socket() {
+int get_socket()
+{
 	struct sockaddr_in server_addr = {
 		.sin_family = AF_INET,
 		.sin_port = htons(cpp_proxy.cmd_options->port),
 		.sin_addr = {
-			.s_addr = inet_addr(cpp_proxy.cmd_options->ip.c_str())
-		}
-	};
+			.s_addr = inet_addr(cpp_proxy.cmd_options->ip.c_str())}};
 
 	int sock_client;
-	if ((sock_client = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	if ((sock_client = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
 		cerr << "Error: socket creation failed" << endl;
 		exit(-1);
 	}
 
 	while (connect(sock_client, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
 	{
-		cerr << "Error: connection to server with IP: "\
-			<< cpp_proxy.cmd_options->ip << " Port: "\
-			<< cpp_proxy.cmd_options->port << " failed." << endl;
+		cerr << "Error: connection to server with IP: "
+			 << cpp_proxy.cmd_options->ip << " Port: "
+			 << cpp_proxy.cmd_options->port << " failed." << endl;
 		sleep(1);
 	}
 
-	cout << "Connection to server with IP: "\
-		<< cpp_proxy.cmd_options->ip << " Port: "\
-		<< cpp_proxy.cmd_options->port << " established." << endl;
+	cout << "Connection to server with IP: "
+		 << cpp_proxy.cmd_options->ip << " Port: "
+		 << cpp_proxy.cmd_options->port << " established." << endl;
 
 	return sock_client;
 }
-
 
 int main(int argc, char **argv)
 {
