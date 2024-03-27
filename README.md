@@ -1,6 +1,6 @@
 # Gazebo Proxy 
 
-This application is a proxy to fetch available sensor data from the gazebo simulator and forward it to the TrentOS SimCoupler component.
+This application is a proxy to fetch available sensor data from the gazebo simulator and forward it to the TrentOS SimCoupler component part of [demo_vm_drone_sim](https://github.com/TRENT-OS/demo_vm_drone_sim) but can also be used independently for any purpose which requires a mavlink proxy.
 It is not running as part of the TrentOS system and needs to be started by the user seperately on the **host** system outside of the TrentOS Docker environment. It therefore is not part of the TrentOS build system.
 
 
